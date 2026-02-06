@@ -1,0 +1,25 @@
+{
+  "name": "opencode-cursor-rules",
+  "version": "1.0.0",
+  "description": "OpenCode plugin for full Cursor rules (.mdc) support with frontmatter, globs, and all rule modes",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "typecheck": "bun x tsc --noEmit",
+    "check": "bun x tsc --noEmit && bun test"
+  },
+  "dependencies": {
+    "picomatch": "^4.0.3",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.1.53",
+    "@types/bun": "latest",
+    "@types/picomatch": "^4.0.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

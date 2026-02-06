@@ -1,0 +1,1 @@
+ts=2026-02-06T17:30:28.379Z type=learning scope=cursor-rules content="Cursor rules files use .mdc extension, not .md. When searching for rule files, always look for *.mdc files in .cursor/rules/ directory." tags=cursor,rules,mdc,file-extension
