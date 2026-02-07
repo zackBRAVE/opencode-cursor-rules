@@ -206,6 +206,10 @@ npm run check:fix     # Auto-fix all issues
 
 Contributions are welcome! Please read our contributing guidelines before submitting PRs.
 
+## Release
+
+Releases are created manually using GitHub CLI instead of automated Release Please due to GraphQL API authentication issues. See RELEASE.md for details.
+
 ## License
 
 MIT
