@@ -1,0 +1,20 @@
+# Development files
+node_modules/
+.git/
+.gitignore
+
+# Build and config
+tsconfig.json
+bunfig.bak
+
+# Development tooling
+lefthook.yml
+commitlint.config.cjs
+
+# Tests and fixtures
+tests/
+tests/fixtures/
+
+# IDE
+.vscode/
+.idea/
