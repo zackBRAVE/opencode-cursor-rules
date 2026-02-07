@@ -1,0 +1,9 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "opencode-cursor-rules"
+    }
+  },
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}

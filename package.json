@@ -32,7 +32,8 @@
     "format:fix": "biome format . --write",
     "check:biome": "biome check .",
     "check:biome:fix": "biome check . --write",
-    "check": "bun x tsc --noEmit && biome check . && bun test"
+    "check": "bun x tsc --noEmit && biome check . && bun test",
+    "release": "release-please release-pr --token=${GITHUB_TOKEN}"
   },
   "dependencies": {
     "picomatch": "^4.0.3",
@@ -45,7 +46,8 @@
     "@opencode-ai/plugin": "^1.1.53",
     "@types/bun": "latest",
     "@types/picomatch": "^4.0.2",
-    "lefthook": "^2.1.0"
+    "lefthook": "^2.1.0",
+    "release-please": "^17.2.0"
   },
   "peerDependencies": {
     "typescript": "^5"
