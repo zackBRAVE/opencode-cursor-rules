@@ -1,59 +1,72 @@
-# opencode-cursor-rules
+# 📋 opencode-cursor-rules
 
-An OpenCode plugin that brings full **Cursor rules** (`.mdc` files) support to OpenCode. Symlink your `.cursor/rules` into `.opencode/rules` and everything just works -- frontmatter, globs, all four rule application modes.
+[![npm version](https://img.shields.io/npm/v/opencode-cursor-rules.svg)](https://www.npmjs.com/package/opencode-cursor-rules)
+[![License MIT](https://img.shields.io/npm/l/opencode-cursor-rules.svg)](https://opensource.org/licenses/MIT)
 
-## Features
+Bring **full Cursor rules support** to OpenCode. This plugin reads `.mdc` rule files and injects them into AI conversations -- exactly how Cursor does it.
 
-- **Full MDC format support** -- YAML frontmatter with `description`, `globs`, `alwaysApply`
-- **All 4 rule modes** -- always-apply, auto-attach (glob), agent-requested (description), manual (@mention)
-- **Project + user-level rules** -- project rules in `.opencode/rules/`, global rules in `~/.config/opencode/rules/`
-- **Symlink-friendly** -- symlink `.cursor/rules` → `.opencode/rules/` for zero-config Cursor compatibility
-- **Legacy `.cursorrules` support** -- auto-detected and always applied
-- **Performance-first** -- mtime-based caching, no file watchers, sub-millisecond warm-cache injection
-- **Robust** -- handles missing dirs, broken symlinks, malformed YAML, empty files gracefully
+**No config needed if you already use Cursor.** Just symlink your rules and you're done.
 
-## Quick Start
+## Why opencode-cursor-rules?
 
-### 1. Install
+- ✅ **100% Cursor-compatible** -- Same `.mdc` format, same frontmatter, same behavior
+- ✅ **All 4 rule modes** -- always-apply, glob-matching, agent-requested, manual
+- ✅ **Zero config** -- Works with your existing Cursor rules via symlinks
+- ✅ **Blazing fast** -- mtime caching, no file watchers, sub-millisecond injection
+- ✅ **Battle-tested** -- handles broken symlinks, malformed YAML, missing files gracefully
+- ✅ **Rule management** -- Create and list rules via OpenCode tools
 
-Add to your OpenCode config (`~/.config/opencode/opencode.jsonc`):
+## Installation
+
+```bash
+# Install the package
+bun add opencode-cursor-rules
+
+# Or with pnpm
+pnpm add opencode-cursor-rules
+
+# Or with npm
+npm install opencode-cursor-rules
+```
+
+Then add it to your OpenCode config (`~/.config/opencode/opencode.jsonc`):
 
 ```jsonc
 {
   "plugin": [
-    "opencode-cursor-rules@local:./custom-plugins/opencode-cursor-rules"
+    "opencode-cursor-rules"
   ]
 }
 ```
 
-### 2. Set Up Rules
+## Quick Start
 
-**Option A: Symlink from Cursor (recommended)**
+### Option 1: Use Your Existing Cursor Rules (Recommended)
 
 ```bash
-# Project-level: symlink .cursor/rules to .opencode/rules
+# Project-level rules
 cd your-project
 ln -s .cursor/rules .opencode/rules
 
-# User-level: symlink global cursor rules
+# User-level rules (global)
 ln -s ~/.cursor/rules ~/.config/opencode/rules
 ```
 
-**Option B: Create rules directly**
+### Option 2: Create Rules Directly
 
 ```bash
 mkdir -p .opencode/rules
 ```
 
-Then create `.mdc` files in the directory (see Rule Format below).
+Create `.mdc` files in the directory (see Rule Format below).
 
-### 3. Restart OpenCode
+### Restart OpenCode
 
-Rules are loaded on plugin initialization. After adding/changing rules, restart OpenCode or start a new session.
+Rules load on plugin initialization. Start a new session after adding/changing rules.
 
 ## Rule Format
 
-Rules use the **MDC format** (Markdown with YAML frontmatter), identical to Cursor:
+Rules use **MDC format** (Markdown + YAML frontmatter), identical to Cursor:
 
 ```markdown
 ---
@@ -70,13 +83,11 @@ This gets injected into the AI's system prompt.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `description` | `string` | — | Rule purpose; shown to AI for agent-requested rules |
+| `description` | `string` | — | Rule purpose; shown to AI for agent-requested selection |
 | `globs` | `string \| string[]` | `[]` | Comma-separated or array of file glob patterns |
 | `alwaysApply` | `boolean` | `false` | Always inject this rule into every conversation |
 
 ### Rule Application Modes
-
-How a rule gets applied depends on its frontmatter configuration:
 
 | Mode | Frontmatter | Behavior |
 |------|------------|----------|
@@ -87,7 +98,7 @@ How a rule gets applied depends on its frontmatter configuration:
 
 ### Examples
 
-**Always-apply rule** (`coding-standards.mdc`):
+**Always-apply rule:**
 
 ```markdown
 ---
@@ -100,7 +111,7 @@ alwaysApply: true
 - Keep functions under 30 lines
 ```
 
-**Glob-based rule** (`react-patterns.mdc`):
+**Glob-based rule:**
 
 ```markdown
 ---
@@ -113,7 +124,7 @@ Follow the container/presenter pattern.
 Prefer composition over inheritance.
 ```
 
-**Agent-requested rule** (`api-design.mdc`):
+**Agent-requested rule:**
 
 ```markdown
 ---
@@ -125,7 +136,7 @@ Version your APIs with /v1/ prefix.
 Return consistent error response shapes.
 ```
 
-**Manual rule** (`migration-guide.mdc`):
+**Manual rule:**
 
 ```markdown
 # Legacy Migration Guide
@@ -137,38 +148,56 @@ When refactoring from v1 to v2:
 
 Trigger with: `@migration-guide help me migrate this file`
 
-## Directory Structure
-
-```
-~/.config/opencode/
-├── opencode.jsonc          # Plugin config
-├── rules/                  # User-level rules (global)
-│   └── *.mdc
-└── custom-plugins/
-    └── opencode-cursor-rules/   # This plugin
-        ├── index.ts
-        └── src/
-            ├── parser.ts    # MDC frontmatter parsing
-            ├── loader.ts    # File discovery + caching
-            ├── matcher.ts   # Rule selection logic
-            └── types.ts     # TypeScript interfaces
-
-your-project/
-├── .opencode/
-│   └── rules/              # Project-level rules (symlink to .cursor/rules)
-│       └── *.mdc
-├── .cursor/
-│   └── rules/              # Cursor rules (source of truth)
-│       └── *.mdc
-└── .cursorrules             # Legacy format (auto-detected)
-```
-
 ## Rule Priority
 
 1. **Project rules** override **user rules** on name collision
 2. **User rules** loaded first (lower priority)
 3. **Legacy `.cursorrules`** loaded last (won't override named rules)
 4. **@-mention** always promotes a rule to injected, regardless of its mode
+
+## OpenCode Tools
+
+The plugin provides tools for managing rules programmatically:
+
+### `create_user_rule`
+
+Create a new user-level rule in `~/.config/opencode/rules/`.
+
+```typescript
+{
+  name: "typescript-standards",
+  description: "TypeScript coding standards",
+  content: "- Use strict TypeScript\n- Prefer interfaces over types",
+  globs: ["*.ts", "*.tsx"],
+  alwaysApply: false
+}
+```
+
+### `create_project_rule`
+
+Create a new project-level rule in `.opencode/rules/`. Same parameters plus optional `worktree` for custom directories.
+
+### `list_rules`
+
+List all loaded rules with metadata, sources, and application modes.
+
+## Available Scripts
+
+```bash
+# Run tests
+npm test
+
+# Type check
+npm run typecheck
+
+# Run Biome checks
+npm run lint          # Check for issues
+npm run lint:fix      # Auto-fix issues
+npm run format        # Check formatting
+npm run format:fix    # Auto-fix formatting
+npm run check         # Run all checks (types + lint + format)
+npm run check:fix     # Auto-fix all issues
+```
 
 ## Performance
 
@@ -180,40 +209,12 @@ your-project/
 
 - **No file watchers** -- uses `stat()` mtime for cache invalidation
 - **Lazy caching** -- files parsed once, re-parsed only on modification
-- **Zero dependencies at runtime** beyond `yaml` and `picomatch`
+- **Minimal runtime dependencies** -- only `yaml` and `picomatch`
 
-## Development
+## Contributing
 
-```bash
-# Install dependencies
-bun install
-
-# Run tests
-bun test
-
-# Run tests in watch mode
-bun test --watch
-
-# Type check
-bun x tsc --noEmit
-
-# Run both checks
-bun run check
-```
-
-### Test Coverage
-
-- **77 tests** across 4 test suites
-- **Parser tests** -- frontmatter extraction, YAML edge cases, normalization
-- **Loader tests** -- file discovery, caching, symlinks, broken links
-- **Matcher tests** -- all 4 rule modes, deduplication, @-mentions
-- **Integration tests** -- end-to-end pipeline, performance benchmarks
-
-## Technical Design
-
-See [DESIGN.md](./DESIGN.md) for the full technical design document.
+Contributions are welcome! Please read our contributing guidelines before submitting PRs.
 
 ## License
 
 MIT
-test change

@@ -1,19 +1,19 @@
-# opencode-cursor-rules - Technical Design Document
+# opencode-cursor-rules - Technical Design
 
 ## Overview
 
-An OpenCode plugin that brings full Cursor rules support to OpenCode. It reads `.mdc` rule files (with YAML frontmatter) from both user-level and project-level directories, then injects matching rules into the LLM system prompt via OpenCode's plugin hooks.
+An OpenCode plugin that brings **full Cursor rules support** to OpenCode. It reads `.mdc` rule files from user-level and project-level directories, then injects matching rules into AI conversations -- **exactly how Cursor does it**.
 
-The plugin is designed as a **symlink-friendly** bridge: users symlink `.cursor/rules` into `.opencode/rules` (or `~/.config/opencode/rules`), and the plugin handles everything from there.
+The plugin is designed as a **symlink-friendly bridge**: users symlink `.cursor/rules` into `.opencode/rules` (or `~/.config/opencode/rules`), and the plugin handles everything. No config, no migration, just works.
 
 ## Goals
 
-1. **Full Cursor MDC compatibility** - Parse all frontmatter fields (`description`, `globs`, `alwaysApply`)
-2. **All four rule application modes** - Always, auto-attach (glob), agent-requested (description), manual
-3. **Both project and user/global rules** - Project: `<project>/.opencode/rules/`, User: `~/.config/opencode/rules/`
-4. **Performance** - Lazy loading, mtime-based caching, zero file watchers, minimal memory
-5. **Robustness** - Handle broken symlinks, missing dirs, malformed YAML, circular refs gracefully
-6. **Legacy support** - `.cursorrules` flat file in project root
+1. **100% Cursor-compatible** -- Same `.mdc` format, same frontmatter, same behavior
+2. **All four rule application modes** -- Always, auto-attach (glob), agent-requested (description), manual
+3. **Both project and user/global rules** -- Project: `<project>/.opencode/rules/`, User: `~/.config/opencode/rules/`
+4. **Performance** -- Lazy loading, mtime-based caching, zero file watchers, minimal memory
+5. **Robustness** -- Handle broken symlinks, missing dirs, malformed YAML, circular refs gracefully
+6. **Legacy support** -- `.cursorrules` flat file in project root
 
 ## Architecture
 
@@ -23,7 +23,8 @@ src/
 ├── parser.ts     MDC frontmatter extraction + YAML parsing
 ├── loader.ts     Rule discovery, caching, mtime invalidation
 ├── matcher.ts    Glob matching + rule selection logic
-└── types.ts      Shared TypeScript interfaces
+├── tools.ts      OpenCode tools for rule management
+└── types.ts      TypeScript interfaces
 ```
 
 ### Why This Structure
@@ -31,7 +32,8 @@ src/
 - **parser.ts** is pure: string in → structured data out. No I/O side effects, easily testable.
 - **loader.ts** owns all filesystem access. Caches parsed rules keyed by `(path, mtime)`.
 - **matcher.ts** is pure: rules + context → selected rules. No I/O, easily testable.
-- **index.ts** is the thin orchestration layer that connects loader + matcher to OpenCode hooks.
+- **tools.ts** implements OpenCode tools for creating and listing rules.
+- **index.ts** is the thin orchestration layer that connects loader + matcher + tools to OpenCode hooks.
 
 ## Core Components
 
@@ -120,7 +122,15 @@ Selects which rules to inject based on the current context.
 - `chat.message` captures user message text for @-mentions
 - Session state stored in a `Map<sessionID, SessionState>`
 
-### 4. Plugin Entry (`index.ts`)
+### 4. OpenCode Tools (`src/tools.ts`)
+
+Provides tools for managing rules programmatically:
+
+**`create_user_rule`** -- Create user-level rule in `~/.config/opencode/rules/`
+**`create_project_rule`** -- Create project-level rule in `.opencode/rules/`
+**`list_rules`** -- List all loaded rules with metadata
+
+### 5. Plugin Entry (`index.ts`)
 
 Thin wiring layer. Initializes loader, returns hooks object.
 
@@ -182,23 +192,11 @@ All errors are caught and logged, never thrown to OpenCode:
 - File read errors → skip file, log warning
 - Empty files → skip
 
-## Testing Strategy
-
-| Layer | Test Type | What |
-|-------|-----------|------|
-| Parser | Unit | Frontmatter extraction, YAML parsing, edge cases |
-| Loader | Unit + Integration | File discovery, caching, mtime invalidation, symlinks |
-| Matcher | Unit | Rule selection across all 4 modes |
-| Plugin | Integration | Full hook flow with mock context |
-
 ## Dependencies
 
 **Runtime:**
-- `yaml` - YAML frontmatter parsing (fast, well-maintained)
-- `picomatch` - Glob matching (fast, no dependencies)
-- `@opencode-ai/plugin` - OpenCode plugin types
+- `yaml` -- YAML frontmatter parsing
+- `picomatch` -- Fast glob matching
 
 **Dev:**
-- `@types/bun` - Bun runtime types
-- `@types/picomatch` - Picomatch types
-- `typescript` - Type checking
+- TypeScript, Bun, Biome
