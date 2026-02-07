@@ -2,8 +2,25 @@
   "name": "opencode-cursor-rules",
   "version": "1.0.0",
   "description": "OpenCode plugin for full Cursor rules (.mdc) support with frontmatter, globs, and all rule modes",
-  "module": "index.ts",
+  "main": "index.ts",
   "type": "module",
+  "keywords": [
+    "opencode",
+    "cursor",
+    "cursorrules",
+    "rules",
+    "ai-coding",
+    "plugin"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zackBRAVE/opencode-cursor-rules.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zackBRAVE/opencode-cursor-rules/issues"
+  },
+  "author": "zackBRAVE <zackbrave@outlook.com>",
+  "license": "MIT",
   "scripts": {
     "prepare": "lefthook install",
     "test": "bun test",
