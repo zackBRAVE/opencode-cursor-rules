@@ -1,6 +1,6 @@
+import { basename } from "node:path";
 import picomatch from "picomatch";
-import { basename } from "path";
-import type { Rule, RuleMode, MatchedRule, SessionState } from "./types";
+import type { MatchedRule, Rule, RuleMode, SessionState } from "./types";
 
 /**
  * Determine the application mode of a rule based on its frontmatter.
@@ -95,19 +95,13 @@ function matchGlobs(globs: string[], filePaths: Set<string>): string | null {
   // - Full path matchers (default picomatch behavior)
   // - Basename matchers (for simple extension patterns)
   const fullMatchers = globs.map((g) => picomatch(g, { dot: true }));
-  const baseMatchers = globs.map((g) =>
-    picomatch(g, { dot: true, basename: true })
-  );
+  const baseMatchers = globs.map((g) => picomatch(g, { dot: true, basename: true }));
 
   for (const file of filePaths) {
     const base = basename(file);
     for (let i = 0; i < globs.length; i++) {
       // Match full relative path first, then try basename
-      if (
-        fullMatchers[i]!(file) ||
-        baseMatchers[i]!(file) ||
-        fullMatchers[i]!(base)
-      ) {
+      if (fullMatchers[i]?.(file) || baseMatchers[i]?.(file) || fullMatchers[i]?.(base)) {
         return file;
       }
     }
@@ -126,11 +120,12 @@ function extractMentionedRules(message: string): Set<string> {
 
   // Match @rule-name patterns (not email addresses)
   const re = /(?:^|\s)@([\w][\w-]*)/g;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(message)) !== null) {
+  let match: RegExpExecArray | null = re.exec(message);
+  while (match !== null) {
     if (match[1]) {
       names.add(match[1]);
     }
+    match = re.exec(message);
   }
 
   return names;
@@ -201,9 +196,7 @@ export function formatSystemPromptSection(
       '<suggested_rules description="These rules matched files in the current context. Read them with your file read tool before proceeding.">',
     );
     for (const { rule, reason } of suggested) {
-      const desc = rule.frontmatter.description
-        ? ` — ${rule.frontmatter.description}`
-        : "";
+      const desc = rule.frontmatter.description ? ` — ${rule.frontmatter.description}` : "";
       parts.push(`- **${rule.name}**${desc}`);
       parts.push(`  Path: ${rule.sourcePath}`);
       parts.push(`  Matched because: ${reason}`);

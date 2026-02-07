@@ -1,8 +1,8 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { join } from "path";
-import { mkdirSync, rmSync, writeFileSync, symlinkSync } from "fs";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { RuleLoader } from "../src/loader";
-import { selectRules, formatSystemPromptSection } from "../src/matcher";
+import { formatSystemPromptSection, selectRules } from "../src/matcher";
 import type { SessionState } from "../src/types";
 
 const FIXTURES_DIR = join(import.meta.dir, "fixtures", "integration-test");
@@ -157,7 +157,7 @@ Replace v1 APIs with v2 equivalents.`,
 
     const { injected } = selectRules(rules, session);
     expect(injected.length).toBe(1);
-    expect(injected[0]!.rule.name).toBe("migration-guide");
+    expect(injected[0]?.rule.name).toBe("migration-guide");
 
     // @-mentioned rules get full content injected
     const prompt = formatSystemPromptSection(injected, [], []);
@@ -183,8 +183,8 @@ This rule comes from .cursor/rules via symlink.`,
 
     const rules = await loader.loadAll(null, PROJECT_RULES_DIR, null);
     expect(rules.length).toBe(1);
-    expect(rules[0]!.name).toBe("cursor-rule");
-    expect(rules[0]!.frontmatter.alwaysApply).toBe(true);
+    expect(rules[0]?.name).toBe("cursor-rule");
+    expect(rules[0]?.frontmatter.alwaysApply).toBe(true);
 
     const session: SessionState = { filePaths: new Set(), lastUserMessage: "" };
     const { injected } = selectRules(rules, session);
@@ -251,8 +251,8 @@ Project-specific preferences.`,
 
     const rules = await loader.loadAll(USER_RULES_DIR, PROJECT_RULES_DIR, null);
     expect(rules.length).toBe(1);
-    expect(rules[0]!.source).toBe("project");
-    expect(rules[0]!.body.trim()).toBe("Project-specific preferences.");
+    expect(rules[0]?.source).toBe("project");
+    expect(rules[0]?.body.trim()).toBe("Project-specific preferences.");
   });
 
   test("suggested rules include correct file paths with .mdc extension", async () => {
@@ -277,7 +277,7 @@ Rule content.`,
     expect(suggested.length).toBe(1);
 
     // The sourcePath must have .mdc extension
-    expect(suggested[0]!.rule.sourcePath).toEndWith(".mdc");
+    expect(suggested[0]?.rule.sourcePath).toEndWith(".mdc");
 
     // Formatted output must include the actual .mdc path
     const prompt = formatSystemPromptSection([], suggested, []);

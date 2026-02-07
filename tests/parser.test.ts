@@ -1,4 +1,4 @@
-import { describe, test, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { parseMdc } from "../src/parser";
 
 describe("parseMdc", () => {
@@ -238,7 +238,7 @@ body`;
 
   describe("edge cases", () => {
     test("handles Windows-style line endings (CRLF)", () => {
-      const raw = "---\r\ndescription: test\r\nglobs: \"*.ts\"\r\n---\r\nBody content.";
+      const raw = '---\r\ndescription: test\r\nglobs: "*.ts"\r\n---\r\nBody content.';
       const result = parseMdc(raw);
 
       expect(result.frontmatter.description).toBe("test");

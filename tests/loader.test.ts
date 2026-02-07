@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach, afterEach } from "bun:test";
-import { join } from "path";
-import { mkdirSync, rmSync, writeFileSync, symlinkSync, utimesSync } from "fs";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdirSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { RuleLoader } from "../src/loader";
 
 const FIXTURES_DIR = join(import.meta.dir, "fixtures", "loader-test");
@@ -40,7 +40,7 @@ describe("RuleLoader", () => {
 description: "User rule"
 alwaysApply: true
 ---
-User rule content.`
+User rule content.`,
       );
 
       writeRule(
@@ -50,7 +50,7 @@ User rule content.`
 description: "Project rule"
 globs: "*.ts"
 ---
-Project rule content.`
+Project rule content.`,
       );
 
       const rules = await loader.loadAll(USER_RULES, PROJECT_RULES, null);
@@ -67,7 +67,7 @@ Project rule content.`
         `---
 description: "User version"
 ---
-User content.`
+User content.`,
       );
 
       writeRule(
@@ -76,14 +76,14 @@ User content.`
         `---
 description: "Project version"
 ---
-Project content.`
+Project content.`,
       );
 
       const rules = await loader.loadAll(USER_RULES, PROJECT_RULES, null);
 
       expect(rules.length).toBe(1);
-      expect(rules[0]!.source).toBe("project");
-      expect(rules[0]!.frontmatter.description).toBe("Project version");
+      expect(rules[0]?.source).toBe("project");
+      expect(rules[0]?.frontmatter.description).toBe("Project version");
     });
 
     test("loads legacy .cursorrules file", async () => {
@@ -92,17 +92,17 @@ Project content.`
       const rules = await loader.loadAll(null, null, LEGACY_FILE);
 
       expect(rules.length).toBe(1);
-      expect(rules[0]!.name).toBe(".cursorrules");
-      expect(rules[0]!.source).toBe("legacy");
-      expect(rules[0]!.frontmatter.alwaysApply).toBe(true);
-      expect(rules[0]!.body).toBe("Legacy cursor rules content.");
+      expect(rules[0]?.name).toBe(".cursorrules");
+      expect(rules[0]?.source).toBe("legacy");
+      expect(rules[0]?.frontmatter.alwaysApply).toBe(true);
+      expect(rules[0]?.body).toBe("Legacy cursor rules content.");
     });
 
     test("handles missing directories gracefully", async () => {
       const rules = await loader.loadAll(
         "/nonexistent/user/rules",
         "/nonexistent/project/rules",
-        "/nonexistent/.cursorrules"
+        "/nonexistent/.cursorrules",
       );
 
       expect(rules.length).toBe(0);
@@ -121,13 +121,13 @@ Project content.`
         `---
 description: test
 ---
-content`
+content`,
       );
 
       const rules = await loader.loadAll(null, PROJECT_RULES, null);
 
       expect(rules.length).toBe(1);
-      expect(rules[0]!.name).toBe("valid");
+      expect(rules[0]?.name).toBe("valid");
     });
   });
 
@@ -139,12 +139,12 @@ content`
         `---
 description: MD rule
 ---
-Content.`
+Content.`,
       );
 
       const rules = await loader.loadAll(null, PROJECT_RULES, null);
       expect(rules.length).toBe(1);
-      expect(rules[0]!.name).toBe("rule");
+      expect(rules[0]?.name).toBe("rule");
     });
 
     test("loads .mdc files", async () => {
@@ -154,12 +154,12 @@ Content.`
         `---
 description: MDC rule
 ---
-Content.`
+Content.`,
       );
 
       const rules = await loader.loadAll(null, PROJECT_RULES, null);
       expect(rules.length).toBe(1);
-      expect(rules[0]!.name).toBe("rule");
+      expect(rules[0]?.name).toBe("rule");
     });
 
     test("loads mixed .mdc and .md files", async () => {
@@ -169,7 +169,7 @@ Content.`
         `---
 description: alpha
 ---
-Alpha.`
+Alpha.`,
       );
 
       writeRule(
@@ -178,7 +178,7 @@ Alpha.`
         `---
 description: beta
 ---
-Beta.`
+Beta.`,
       );
 
       const rules = await loader.loadAll(null, PROJECT_RULES, null);
@@ -194,7 +194,7 @@ Beta.`
         `---
 description: cached rule
 ---
-Content.`
+Content.`,
       );
 
       // First load
@@ -205,7 +205,7 @@ Content.`
       // Second load (should hit cache)
       const rules2 = await loader.loadAll(null, PROJECT_RULES, null);
       expect(rules2.length).toBe(1);
-      expect(rules2[0]!.frontmatter.description).toBe("cached rule");
+      expect(rules2[0]?.frontmatter.description).toBe("cached rule");
     });
 
     test("invalidates cache when file changes", async () => {
@@ -216,12 +216,12 @@ Content.`
         `---
 description: "version 1"
 ---
-Content v1.`
+Content v1.`,
       );
 
       // First load
       const rules1 = await loader.loadAll(null, PROJECT_RULES, null);
-      expect(rules1[0]!.frontmatter.description).toBe("version 1");
+      expect(rules1[0]?.frontmatter.description).toBe("version 1");
 
       // Modify file (ensure different mtime by bumping it)
       await Bun.sleep(10);
@@ -231,7 +231,7 @@ Content v1.`
         `---
 description: "version 2"
 ---
-Content v2.`
+Content v2.`,
       );
 
       // Force mtime change
@@ -240,7 +240,7 @@ Content v2.`
 
       // Second load (should invalidate cache)
       const rules2 = await loader.loadAll(null, PROJECT_RULES, null);
-      expect(rules2[0]!.frontmatter.description).toBe("version 2");
+      expect(rules2[0]?.frontmatter.description).toBe("version 2");
     });
 
     test("clearCache resets all cached entries", async () => {
@@ -250,7 +250,7 @@ Content v2.`
         `---
 description: test
 ---
-Content.`
+Content.`,
       );
 
       await loader.loadAll(null, PROJECT_RULES, null);
@@ -272,7 +272,7 @@ Content.`
 description: "Symlinked rule"
 alwaysApply: true
 ---
-Symlinked content.`
+Symlinked content.`,
       );
 
       // Create symlink
@@ -282,8 +282,8 @@ Symlinked content.`
       const rules = await loader.loadAll(null, PROJECT_RULES, null);
 
       expect(rules.length).toBe(1);
-      expect(rules[0]!.name).toBe("symlinked");
-      expect(rules[0]!.frontmatter.alwaysApply).toBe(true);
+      expect(rules[0]?.name).toBe("symlinked");
+      expect(rules[0]?.frontmatter.alwaysApply).toBe(true);
     });
 
     test("follows symlinked directories", async () => {
@@ -295,7 +295,7 @@ Symlinked content.`
         `---
 description: "From .cursor/rules"
 ---
-Cursor rule content.`
+Cursor rule content.`,
       );
 
       // Symlink entire directory
@@ -305,7 +305,7 @@ Cursor rule content.`
       const rules = await loader.loadAll(null, linkedDir, null);
 
       expect(rules.length).toBe(1);
-      expect(rules[0]!.name).toBe("from-cursor");
+      expect(rules[0]?.name).toBe("from-cursor");
     });
 
     test("handles broken symlinks gracefully", async () => {
@@ -324,14 +324,14 @@ Cursor rule content.`
         `---
 description: valid
 ---
-Valid content.`
+Valid content.`,
       );
 
       const rules = await loader.loadAll(null, PROJECT_RULES, null);
 
       // Should load the valid rule and skip the broken symlink
       expect(rules.length).toBe(1);
-      expect(rules[0]!.name).toBe("valid");
+      expect(rules[0]?.name).toBe("valid");
     });
   });
 
@@ -343,11 +343,11 @@ Valid content.`
         `---
 description: test
 ---
-content`
+content`,
       );
 
       const rules = await loader.loadAll(USER_RULES, null, null);
-      expect(rules[0]!.source).toBe("user");
+      expect(rules[0]?.source).toBe("user");
     });
 
     test("tags project rules with source 'project'", async () => {
@@ -357,18 +357,18 @@ content`
         `---
 description: test
 ---
-content`
+content`,
       );
 
       const rules = await loader.loadAll(null, PROJECT_RULES, null);
-      expect(rules[0]!.source).toBe("project");
+      expect(rules[0]?.source).toBe("project");
     });
 
     test("tags legacy rules with source 'legacy'", async () => {
       writeFileSync(LEGACY_FILE, "legacy content", "utf-8");
 
       const rules = await loader.loadAll(null, null, LEGACY_FILE);
-      expect(rules[0]!.source).toBe("legacy");
+      expect(rules[0]?.source).toBe("legacy");
     });
   });
 });

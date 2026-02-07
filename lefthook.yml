@@ -1,0 +1,14 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome-check:
+      glob: "*.{ts}"
+      run: bunx biome check --write --staged --no-errors-on-unmatched {staged_files}
+    biome-format:
+      glob: "*.{ts}"
+      run: bunx biome format --write --staged --no-errors-on-unmatched {staged_files}
+
+commit-msg:
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}

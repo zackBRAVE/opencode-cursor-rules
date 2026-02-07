@@ -1,10 +1,6 @@
-import { describe, test, expect } from "bun:test";
-import {
-  getRuleMode,
-  selectRules,
-  formatSystemPromptSection,
-} from "../src/matcher";
-import type { Rule, SessionState, MatchedRule } from "../src/types";
+import { describe, expect, test } from "bun:test";
+import { formatSystemPromptSection, getRuleMode, selectRules } from "../src/matcher";
+import type { MatchedRule, Rule, SessionState } from "../src/types";
 
 function makeRule(overrides: Partial<Rule> = {}): Rule {
   return {
@@ -83,8 +79,8 @@ describe("selectRules", () => {
 
       const { injected } = selectRules(rules, session);
       expect(injected.length).toBe(1);
-      expect(injected[0]!.rule.name).toBe("always-rule");
-      expect(injected[0]!.reason).toBe("alwaysApply: true");
+      expect(injected[0]?.rule.name).toBe("always-rule");
+      expect(injected[0]?.reason).toBe("alwaysApply: true");
     });
 
     test("includes multiple always-apply rules", () => {
@@ -112,7 +108,7 @@ describe("selectRules", () => {
       const { injected, suggested } = selectRules(rules, session);
       expect(injected.length).toBe(0);
       expect(suggested.length).toBe(1);
-      expect(suggested[0]!.rule.name).toBe("ts-rule");
+      expect(suggested[0]?.rule.name).toBe("ts-rule");
     });
 
     test("does not suggest when no files match glob", () => {
@@ -191,7 +187,7 @@ describe("selectRules", () => {
       expect(injected.length).toBe(0);
       expect(suggested.length).toBe(0);
       expect(available.length).toBe(1);
-      expect(available[0]!.name).toBe("agent-rule");
+      expect(available[0]?.name).toBe("agent-rule");
     });
   });
 
@@ -209,7 +205,7 @@ describe("selectRules", () => {
 
       const { injected } = selectRules(rules, session);
       expect(injected.length).toBe(1);
-      expect(injected[0]!.reason).toBe("@mentioned by user");
+      expect(injected[0]?.reason).toBe("@mentioned by user");
     });
 
     test("does not inject manual rule without @-mention", () => {
@@ -242,7 +238,7 @@ describe("selectRules", () => {
 
       const { injected } = selectRules(rules, session);
       expect(injected.length).toBe(1);
-      expect(injected[0]!.rule.name).toBe("agent-rule");
+      expect(injected[0]?.rule.name).toBe("agent-rule");
     });
 
     test("@-mention overrides glob rules to inject", () => {
@@ -355,15 +351,15 @@ describe("selectRules", () => {
 
       // always → injected
       expect(injected.length).toBe(1);
-      expect(injected[0]!.rule.name).toBe("always");
+      expect(injected[0]?.rule.name).toBe("always");
 
       // ts-glob → suggested (css-glob not matched)
       expect(suggested.length).toBe(1);
-      expect(suggested[0]!.rule.name).toBe("ts-glob");
+      expect(suggested[0]?.rule.name).toBe("ts-glob");
 
       // agent-desc → available
       expect(available.length).toBe(1);
-      expect(available[0]!.name).toBe("agent-desc");
+      expect(available[0]?.name).toBe("agent-desc");
 
       // manual-only → nowhere (not @-mentioned)
     });

@@ -1,7 +1,7 @@
-import { join, basename } from "path";
-import { stat } from "fs/promises";
+import { stat } from "node:fs/promises";
+import { basename } from "node:path";
 import { parseMdc } from "./parser";
-import type { Rule, RuleSource, CacheEntry } from "./types";
+import type { CacheEntry, Rule, RuleSource } from "./types";
 
 /**
  * RuleLoader discovers and caches rules from disk.
@@ -23,7 +23,7 @@ export class RuleLoader {
   async loadAll(
     userRulesDir: string | null,
     projectRulesDir: string | null,
-    legacyFilePath: string | null
+    legacyFilePath: string | null,
   ): Promise<Rule[]> {
     const rulesByName = new Map<string, Rule>();
 
@@ -37,10 +37,7 @@ export class RuleLoader {
 
     // Project rules loaded second (higher priority, overrides user)
     if (projectRulesDir) {
-      const projectRules = await this.loadFromDirectory(
-        projectRulesDir,
-        "project"
-      );
+      const projectRules = await this.loadFromDirectory(projectRulesDir, "project");
       for (const rule of projectRules) {
         rulesByName.set(rule.name, rule);
       }
@@ -60,10 +57,7 @@ export class RuleLoader {
   /**
    * Scan a directory for .mdc and .md rule files, parse them with caching.
    */
-  private async loadFromDirectory(
-    dir: string,
-    source: RuleSource
-  ): Promise<Rule[]> {
+  private async loadFromDirectory(dir: string, source: RuleSource): Promise<Rule[]> {
     const rules: Rule[] = [];
 
     let files: string[];
@@ -113,10 +107,7 @@ export class RuleLoader {
   /**
    * Load a single rule file with mtime-based caching.
    */
-  private async loadSingleFile(
-    filePath: string,
-    source: RuleSource
-  ): Promise<Rule | null> {
+  private async loadSingleFile(filePath: string, source: RuleSource): Promise<Rule | null> {
     let mtimeMs: number;
     try {
       const s = await stat(filePath);

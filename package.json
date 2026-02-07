@@ -5,19 +5,30 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "prepare": "lefthook install",
     "test": "bun test",
     "test:watch": "bun test --watch",
     "typecheck": "bun x tsc --noEmit",
-    "check": "bun x tsc --noEmit && bun test"
+    "lint": "biome lint .",
+    "lint:fix": "biome lint . --write",
+    "format": "biome format .",
+    "format:fix": "biome format . --write",
+    "check:biome": "biome check .",
+    "check:biome:fix": "biome check . --write",
+    "check": "bun x tsc --noEmit && biome check . && bun test"
   },
   "dependencies": {
     "picomatch": "^4.0.3",
     "yaml": "^2.8.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.3.14",
+    "@commitlint/cli": "^20.4.1",
+    "@commitlint/config-conventional": "^20.4.1",
     "@opencode-ai/plugin": "^1.1.53",
     "@types/bun": "latest",
-    "@types/picomatch": "^4.0.2"
+    "@types/picomatch": "^4.0.2",
+    "lefthook": "^2.1.0"
   },
   "peerDependencies": {
     "typescript": "^5"
