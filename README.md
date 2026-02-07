@@ -18,20 +18,7 @@ Bring **full Cursor rules support** to OpenCode. This plugin reads `.mdc` rule f
 
 ## Installation
 
-```bash
-# Install the package (recommended: pin to a specific version)
-bun add opencode-cursor-rules@1.0.0
-
-# Or with pnpm
-pnpm add opencode-cursor-rules@1.0.0
-
-# Or with npm
-npm install opencode-cursor-rules@1.0.0
-```
-
-> ⚠️ **Tip:** Pin to a specific version (e.g., `@1.0.0`) to prevent automatic updates. OpenCode may reinstall plugins on every startup if no version is specified.
-
-Then add it to your OpenCode config (`~/.config/opencode/opencode.jsonc`):
+OpenCode automatically installs plugins on startup. Simply add it to your config (`~/.config/opencode/opencode.jsonc`):
 
 ```jsonc
 {
@@ -40,6 +27,8 @@ Then add it to your OpenCode config (`~/.config/opencode/opencode.jsonc`):
   ]
 }
 ```
+
+> ⚠️ **Important:** Always pin to a specific version (e.g., `@1.0.0`) to prevent breaking changes. OpenCode installs the latest version if no version is specified.
 
 ## Quick Start
 
