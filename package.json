@@ -1,6 +1,6 @@
 {
   "name": "opencode-cursor-rules",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "OpenCode plugin for full Cursor rules (.mdc) support with frontmatter, globs, and all rule modes",
   "main": "index.ts",
   "type": "module",
@@ -33,7 +33,7 @@
     "check:biome": "biome check .",
     "check:biome:fix": "biome check . --write",
     "check": "bun x tsc --noEmit && biome check . && bun test",
-    "release": "release-please release-pr --token=${GITHUB_TOKEN}"
+    "release": "release-please release-pr --repo-url=https://github.com/zackBRAVE/opencode-cursor-rules.git"
   },
   "dependencies": {
     "picomatch": "^4.0.3",
