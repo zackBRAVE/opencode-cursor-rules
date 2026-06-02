@@ -37,7 +37,7 @@ OpenCode automatically installs plugins on startup. Simply add it to your config
 ```bash
 # Project-level rules
 cd your-project
-ln -s .cursor/rules .opencode/rules
+ln -s ../.cursor/rules .opencode/rules
 
 # User-level rules (global)
 ln -s ~/.cursor/rules ~/.config/opencode/rules
