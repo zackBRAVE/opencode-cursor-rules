@@ -60,6 +60,36 @@ Project rule content.`,
       expect(rules.find((r) => r.name === "project-rule")).toBeDefined();
     });
 
+    test("loads nested rules from user and project directories", async () => {
+      const nestedUserDir = join(USER_RULES, "common", "deep");
+      const nestedProjectDir = join(PROJECT_RULES, "project-common");
+      createDir(nestedUserDir);
+      createDir(nestedProjectDir);
+
+      writeRule(
+        nestedUserDir,
+        "nested-user.md",
+        `---
+description: "Nested user rule"
+---
+Nested user rule content.`,
+      );
+
+      writeRule(
+        nestedProjectDir,
+        "nested-project.mdc",
+        `---
+description: "Nested project rule"
+---
+Nested project rule content.`,
+      );
+
+      const rules = await loader.loadAll(USER_RULES, PROJECT_RULES, null);
+
+      expect(rules.find((r) => r.name === "nested-user")?.source).toBe("user");
+      expect(rules.find((r) => r.name === "nested-project")?.source).toBe("project");
+    });
+
     test("project rules override user rules on name collision", async () => {
       writeRule(
         USER_RULES,

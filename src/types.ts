@@ -47,6 +47,20 @@ export interface SessionState {
   filePaths: Set<string>;
   /** Latest user message text (for @-mention extraction) */
   lastUserMessage: string;
+  /**
+   * Set to true after an explicit init (list_rules tool call or the
+   * use-cursor-rule command); unlocks every rule mode for this session.
+   */
+  explicitlyEnabled: boolean;
+}
+
+/**
+ * Gating inputs deciding which rules may load before an explicit init.
+ */
+export interface SessionRuleAccess {
+  explicitlyEnabled: boolean;
+  loadAlwaysOnStartup: boolean;
+  loadMentionWithoutInit: boolean;
 }
 
 /**

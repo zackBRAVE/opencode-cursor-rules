@@ -11,7 +11,10 @@ import {
 } from "../src/tools";
 
 const FIXTURES_DIR = join(import.meta.dir, "fixtures", "tools-test");
-const TEST_USER_RULES = join(FIXTURES_DIR, "user-rules");
+// getUserRulesDir() resolves to $XDG_CONFIG_HOME/opencode/rules, so point
+// XDG_CONFIG_HOME at the fixtures config dir to keep tests off the real config.
+const TEST_XDG_CONFIG_HOME = join(FIXTURES_DIR, "xdg-config");
+const TEST_USER_RULES = join(TEST_XDG_CONFIG_HOME, "opencode", "rules");
 const TEST_PROJECT_RULES = join(FIXTURES_DIR, "project-rules");
 
 // Store original env var
@@ -26,6 +29,9 @@ describe("tools", () => {
     rmSync(FIXTURES_DIR, { recursive: true, force: true });
     mkdirSync(TEST_USER_RULES, { recursive: true });
     mkdirSync(TEST_PROJECT_RULES, { recursive: true });
+
+    // Isolate user rules writes inside fixtures
+    process.env.XDG_CONFIG_HOME = TEST_XDG_CONFIG_HOME;
   });
 
   afterEach(() => {

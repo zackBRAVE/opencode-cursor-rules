@@ -55,6 +55,23 @@ Create `.mdc` files in the directory (see Rule Format below).
 
 Rules load on plugin initialization. Start a new session after adding/changing rules.
 
+- **OpenCode 1.x**: restart the CLI to reload plugins.
+- **OpenCode 2.x**: plugin files are watched and hot-reloaded by the shared
+  server; if a change does not apply, run `opencode service restart`.
+
+## Compatibility
+
+The plugin supports both host generations from a single codebase:
+
+| Host | Entry point | Notes |
+|------|-------------|-------|
+| OpenCode 1.x | `server` export | v1 hooks (`chat.message`, `experimental.chat.system.transform`, `tool.execute.before`, `config` commands) run natively |
+| OpenCode 2.x | `setup` export | v1 hooks are bridged into v2 registrations (`tool.transform`, `session.hook("context")`, `command.transform`) |
+
+All features — rule loading, glob matching, `@rule-name` mentions, management
+tools, slash commands, and the [opt-in loading](#opt-in-loading-opencode-v2)
+flags — work identically on both hosts.
+
 ## Rule Format
 
 Rules use **MDC format** (Markdown + YAML frontmatter), identical to Cursor:
@@ -86,6 +103,23 @@ This gets injected into the AI's system prompt.
 | **Auto-Attach** | `globs` defined | Injected when session files match patterns |
 | **Agent-Requested** | `description` only (no globs) | Description listed; AI decides if relevant |
 | **Manual** | No frontmatter | Only injected when user types `@rule-name` |
+
+### Opt-In Loading (OpenCode v2)
+
+By default (v2 adapter), **nothing is injected into the system prompt until the
+session is explicitly initialized** — via the `list_rules` tool or the
+`/use-cursor-rule` command. After the init, every mode above works as usual for
+that session.
+
+Two environment flags relax the gating (accept `1` or `true`):
+
+| Flag | Effect when enabled |
+|------|---------------------|
+| `LOAD_ALWAYS_APPLY_RULES_ON_STARTUP` | `alwaysApply: true` rules inject from session start, no init needed |
+| `LOAD_MENTION_RULES_WITHOUT_EXPLICIT_INIT` | Glob / description / `@rule-name` rules work from session start, no init needed |
+
+Both flags off (default) = full opt-in: run `/use-cursor-rule` (or ask the agent
+to call `list_rules`) to unlock rule loading for the current session.
 
 ### Examples
 
@@ -170,7 +204,9 @@ Create a new project-level rule in `.opencode/rules/`. Same parameters plus opti
 
 ### `list_rules`
 
-List all loaded rules with metadata, sources, and application modes.
+List all loaded rules with metadata, sources, and application modes. Calling
+this tool also counts as an explicit session init (see
+[Opt-In Loading](#opt-in-loading-opencode-v2)).
 
 ## Available Scripts
 

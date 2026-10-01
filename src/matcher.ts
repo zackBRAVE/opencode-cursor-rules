@@ -1,6 +1,6 @@
 import { basename } from "node:path";
 import picomatch from "picomatch";
-import type { MatchedRule, Rule, RuleMode, SessionState } from "./types";
+import type { MatchedRule, Rule, RuleMode, SessionRuleAccess, SessionState } from "./types";
 
 /**
  * Determine the application mode of a rule based on its frontmatter.
@@ -10,6 +10,21 @@ export function getRuleMode(rule: Rule): RuleMode {
   if (rule.frontmatter.globs.length > 0) return "glob";
   if (rule.frontmatter.description) return "agent";
   return "manual";
+}
+
+/**
+ * Filter rules to those allowed for a session under the current gating flags.
+ *
+ * After an explicit init every rule is allowed. Before it:
+ * - always-apply rules load only when `loadAlwaysOnStartup` is enabled
+ * - everything else (glob / description / @mention) loads only when
+ *   `loadMentionWithoutInit` is enabled
+ */
+export function filterRulesForSession(rules: Rule[], access: SessionRuleAccess): Rule[] {
+  if (access.explicitlyEnabled) return rules;
+  return rules.filter((rule) =>
+    rule.frontmatter.alwaysApply ? access.loadAlwaysOnStartup : access.loadMentionWithoutInit,
+  );
 }
 
 /**

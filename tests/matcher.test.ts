@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { formatSystemPromptSection, getRuleMode, selectRules } from "../src/matcher";
+import {
+  filterRulesForSession,
+  formatSystemPromptSection,
+  getRuleMode,
+  selectRules,
+} from "../src/matcher";
 import type { MatchedRule, Rule, SessionState } from "../src/types";
 
 function makeRule(overrides: Partial<Rule> = {}): Rule {
@@ -21,9 +26,57 @@ function makeSession(overrides: Partial<SessionState> = {}): SessionState {
   return {
     filePaths: new Set(),
     lastUserMessage: "",
+    explicitlyEnabled: false,
     ...overrides,
   };
 }
+
+describe("filterRulesForSession", () => {
+  const alwaysRule = makeRule({
+    name: "always-rule",
+    frontmatter: { alwaysApply: true, globs: [] },
+  });
+  const mentionRule = makeRule({
+    name: "glob-rule",
+    frontmatter: { alwaysApply: false, globs: ["src/*.ts"] },
+  });
+
+  test("returns every rule after an explicit init", () => {
+    const rules = filterRulesForSession([alwaysRule, mentionRule], {
+      explicitlyEnabled: true,
+      loadAlwaysOnStartup: false,
+      loadMentionWithoutInit: false,
+    });
+    expect(rules.map((r) => r.name)).toEqual(["always-rule", "glob-rule"]);
+  });
+
+  test("gates everything by default (flags off, no init)", () => {
+    const rules = filterRulesForSession([alwaysRule, mentionRule], {
+      explicitlyEnabled: false,
+      loadAlwaysOnStartup: false,
+      loadMentionWithoutInit: false,
+    });
+    expect(rules).toEqual([]);
+  });
+
+  test("loadAlwaysOnStartup keeps only always-apply rules", () => {
+    const rules = filterRulesForSession([alwaysRule, mentionRule], {
+      explicitlyEnabled: false,
+      loadAlwaysOnStartup: true,
+      loadMentionWithoutInit: false,
+    });
+    expect(rules.map((r) => r.name)).toEqual(["always-rule"]);
+  });
+
+  test("loadMentionWithoutInit keeps only non-always rules", () => {
+    const rules = filterRulesForSession([alwaysRule, mentionRule], {
+      explicitlyEnabled: false,
+      loadAlwaysOnStartup: false,
+      loadMentionWithoutInit: true,
+    });
+    expect(rules.map((r) => r.name)).toEqual(["glob-rule"]);
+  });
+});
 
 describe("getRuleMode", () => {
   test("returns 'always' when alwaysApply is true", () => {

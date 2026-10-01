@@ -91,7 +91,7 @@ export class RuleLoader {
     }
 
     const paths: string[] = [];
-    const glob = new Bun.Glob("*.{mdc,md}");
+    const glob = new Bun.Glob("**/*.{mdc,md}");
 
     for await (const file of glob.scan({
       cwd: dir,

@@ -101,6 +101,7 @@ When refactoring from v1 to v2:
     const session: SessionState = {
       filePaths: new Set(["src/utils/helpers.ts", "src/components/Button.tsx"]),
       lastUserMessage: "Help me refactor this component",
+      explicitlyEnabled: true,
     };
 
     const { injected, suggested, available } = selectRules(rules, session);
@@ -153,6 +154,7 @@ Replace v1 APIs with v2 equivalents.`,
     const session: SessionState = {
       filePaths: new Set(),
       lastUserMessage: "Apply @migration-guide to this file",
+      explicitlyEnabled: true,
     };
 
     const { injected } = selectRules(rules, session);
@@ -186,7 +188,11 @@ This rule comes from .cursor/rules via symlink.`,
     expect(rules[0]?.name).toBe("cursor-rule");
     expect(rules[0]?.frontmatter.alwaysApply).toBe(true);
 
-    const session: SessionState = { filePaths: new Set(), lastUserMessage: "" };
+    const session: SessionState = {
+      filePaths: new Set(),
+      lastUserMessage: "",
+      explicitlyEnabled: true,
+    };
     const { injected } = selectRules(rules, session);
     expect(injected.length).toBe(1);
 
@@ -217,7 +223,11 @@ Use modern patterns.`,
     const rules = await loader.loadAll(null, PROJECT_RULES_DIR, LEGACY_FILE);
     expect(rules.length).toBe(2);
 
-    const session: SessionState = { filePaths: new Set(), lastUserMessage: "" };
+    const session: SessionState = {
+      filePaths: new Set(),
+      lastUserMessage: "",
+      explicitlyEnabled: true,
+    };
     const { injected } = selectRules(rules, session);
 
     // Both should be always-apply → injected
@@ -271,6 +281,7 @@ Rule content.`,
     const session: SessionState = {
       filePaths: new Set(["app.ts"]),
       lastUserMessage: "",
+      explicitlyEnabled: true,
     };
 
     const { suggested } = selectRules(rules, session);
@@ -334,7 +345,7 @@ Rule ${i} content.`,
       filePaths.add(`src/module-${i}/index.ts`);
     }
 
-    const session: SessionState = { filePaths, lastUserMessage: "" };
+    const session: SessionState = { filePaths, lastUserMessage: "", explicitlyEnabled: true };
 
     const start = performance.now();
     const { suggested } = selectRules(rules, session);

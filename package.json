@@ -36,6 +36,7 @@
     "release": "release-please release-pr --repo-url=https://github.com/zackBRAVE/opencode-cursor-rules.git"
   },
   "dependencies": {
+    "@opencode-ai/plugin": "^1.1.53",
     "picomatch": "^4.0.3",
     "yaml": "^2.8.2"
   },
@@ -43,7 +44,6 @@
     "@biomejs/biome": "^2.3.14",
     "@commitlint/cli": "^20.4.1",
     "@commitlint/config-conventional": "^20.4.1",
-    "@opencode-ai/plugin": "^1.1.53",
     "@types/bun": "latest",
     "@types/picomatch": "^4.0.2",
     "lefthook": "^2.1.0",
